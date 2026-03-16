@@ -31,15 +31,7 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'MyTools ${{ github.ref_name }}'
-          releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: true
-          prerelease: false
+        run: npm run tauri build
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -68,15 +60,7 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'MyTools ${{ github.ref_name }}'
-          releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: true
-          prerelease: false
+        run: npm run tauri build
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -85,3 +69,39 @@ jobs:
           path: |
             src-tauri/target/release/bundle/msi/*.msi
             src-tauri/target/release/bundle/nsis/*.exe
+
+  create-release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-artifacts
+          path: macos
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-artifacts
+          path: windows
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: MyTools ${{ github.ref_name }}
+          body: |
+            ## MyTools ${{ github.ref_name }}
+            
+            ### 下载
+            - **macOS (Apple Silicon)**: `.dmg` 文件
+            - **Windows**: `.msi` 或 `.exe` 安装包
+            
+            ### 更新日志
+            See [CHANGELOG.md](https://github.com/fuyouguanchazhe/MyTools/blob/main/CHANGELOG.md) for details.
+          draft: false
+          prerelease: false
+          files: |
+            macos/**/*.dmg
+            windows/**/*.msi
+            windows/**/*.exe
