@@ -25,7 +25,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          targets: aarch64-apple-darwin
 
       - name: Install dependencies
         run: npm ci
@@ -40,15 +40,14 @@ jobs:
           releaseBody: 'See CHANGELOG.md for details.'
           releaseDraft: true
           prerelease: false
-          args: --target universal-apple-darwin
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifacts
           path: |
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/macos/*.app
 
   build-windows:
     runs-on: windows-latest
